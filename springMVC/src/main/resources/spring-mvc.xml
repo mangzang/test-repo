@@ -1,0 +1,75 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+">
+
+
+    <!--配置注解扫描-->
+    <context:component-scan base-package="com.lagou"/>
+
+    <!--配置处理器映射器和处理器适配器，功能加强，可以读写json///配置类型转换器，表示使用类型转换器-->
+    <mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven>
+
+
+    <!--id输入配置的类型转换器，生成conversionServiceFactoryBean，将自定的转换日期的类放入setter-->
+    <bean id="conversionService"
+          class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="com.lagou.converter.DateConversion"></bean>
+            </set>
+        </property>
+    </bean>
+
+    <!--配置view视图解析器-->
+    <bean id="InternalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"></property>
+        <property name="suffix" value=".jsp"></property>
+
+    </bean>
+
+
+    <!--放行所有静态资源-->
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+
+<!--
+    mapping表示放行该目录下的所有静态资源文件，location表示静态资源文件所在的位置
+     <mvc:resources mapping="/js/**" location="/js/"></mvc:resources>-->
+
+    <!--配置文件上传解析器-->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 设定文件上传的最大值为5MB，5*1024*1024 -->
+            <property name="maxUploadSize" value="5242880"></property>
+
+        <!-- 设定文件上传时写入内存的最大值，如果小于这个参数不会生成临时文件，默认为10240 -->
+            <property name="maxInMemorySize" value="40960"></property>
+
+    </bean>
+
+
+    <!--配置拦截器//拦截器链//按照注册顺序进行资源拦截//注意执行顺序-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--对哪些资源执行拦截操作./**表示对controller里所有的方法都进行拦截（实际是对所有@requestMapping的方法进行拦截）-->
+            <mvc:mapping path="/**"/>
+            <bean class="com.lagou.Interceptor.MyInterceptor"></bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <!--对哪些资源执行拦截操作./**表示对controller里所有的方法都进行拦截（实际是对所有@requestMapping的方法进行拦截）-->
+            <mvc:mapping path="/**"/>
+            <bean class="com.lagou.Interceptor.MyInterceptor2"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+
+
+</beans>
